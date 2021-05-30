@@ -1,5 +1,5 @@
-const testApiSecretKey = process.env.STRIPE_LIVE_API_KEY;
-const liveApiSecretKey = process.env.STRIPE_TEST_API_KEY;
+const testApiSecretKey = process.env.STRIPE_TEST_API_KEY;
+const liveApiSecretKey = process.env.STRIPE_LIVE_API_KEY;
 const isProduction = false;
 
 const stripe = require('stripe')(isProduction ? liveApiSecretKey : testApiSecretKey);
@@ -20,7 +20,7 @@ exports.handler = async (event) => {
             });
             console.log('Created payment method', paymentMethod);
         } catch (error) {
-            console.log('Could not create payment method')
+            console.log('Could not create payment method', error)
             throw error;
         }
         // Create payment intent
@@ -41,10 +41,12 @@ exports.handler = async (event) => {
                 });
                 console.log('Created payment intent', paymentIntent);
             } else {
-                throw new Error('This payment flow required a valid payment method id');
+                const msg = 'This payment flow required a valid payment method id';
+                console.log(msg);
+                throw new Error(msg);
             }
         } catch (error) {
-            console.log('Could not create payment intent');
+            console.log('Could not create payment intent', error);
             throw error;
         }
         // Confirm
@@ -55,10 +57,12 @@ exports.handler = async (event) => {
                 );
                 console.log('Confirmed payment intent', paymentIntent);
             } else {
-                throw new Error('Cannot confirm payment intent withoud a valid payment intent id');
+                const msg = 'Cannot confirm payment intent withoud a valid payment intent id';
+                console.log(msg);
+                throw new Error(msg);
             }
         } catch (error) {
-            console.log('Could not confirm payment intent');
+            console.log('Could not confirm payment intent', error);
             throw error;
         }
         return {
@@ -66,6 +70,7 @@ exports.handler = async (event) => {
             errorMessage: null
         };
     } catch (error) {
+        console.log(error);
         return {
             success: false,
             errorMessage: error.errorMessage
